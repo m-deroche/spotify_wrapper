@@ -19,7 +19,10 @@ def main(APP_FILE: str):
     api.get_liked()
 
 if __name__ == "__main__":
-    APP_FILE = argv[1]
+    try:
+        APP_FILE = argv[1]
+    except:
+        APP_FILE = "app.ini"
     main(APP_FILE)
 
 

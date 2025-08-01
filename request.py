@@ -62,39 +62,41 @@ class spotify_requests:
             return r
 
         username = self.get_username()
+        json = []
+        step = 50
+        offset = 0
+        r = get_page(1, offset)
+        tracks_number = r["total"]
+        print(tracks_number)
 
-        with open(f"{username}_liked_songs.json", "w", encoding="utf8") as f:
-            json = []
-            step = 50
-            offset = 0
-            r = get_page(1, offset)
-            tracks_number = r["total"]
-            print(tracks_number)
-
-            while tracks_number >= step:
-                r = get_page(step, offset)
-
-                for item in r["items"]:
-                    json.append({
-                        "id": item["track"]["id"],
-                        "song_name": item["track"]["name"],
-                        "artists": [ artist["name"] for artist in item["track"]["artists"] ]
-                    })
-
-                offset += step
-                tracks_number -= step
-                print(f"Fetched liked songs: {offset}")
-
+        while tracks_number >= step:
             r = get_page(step, offset)
 
             for item in r["items"]:
                 json.append({
                     "id": item["track"]["id"],
-                    "song_name": item["track"]["name"],
+                    "track_name": item["track"]["name"],
                     "artists": [ artist["name"] for artist in item["track"]["artists"] ]
                 })
 
-            print(f"Liked songs: {len(json)}")
+            offset += step
+            tracks_number -= step
+            print(f"Fetched liked tracks: {offset}")
+
+        r = get_page(step, offset)
+
+        for item in r["items"]:
+            json.append({
+                "id": item["track"]["id"],
+                "track_name": item["track"]["name"],
+                "artists": [ artist["name"] for artist in item["track"]["artists"] ]
+            })
+
+        print(f"Fetched likes tracks: {offset + len(r['items'])}")
+        print(f"Liked tracks: {len(json)}")
+
+
+        with open(f"{username}_liked_tracks.json", "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
 
 
