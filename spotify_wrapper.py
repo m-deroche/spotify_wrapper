@@ -1,8 +1,8 @@
 #! /bin/python3
 
 import configparser
-from   sys          import argv
-from   request      import spotify_requests
+from sys import argv
+from request import spotify_requests
 
 
 def main(APP_FILE: str):
@@ -18,11 +18,10 @@ def main(APP_FILE: str):
     api = spotify_requests(APP)
     api.get_liked()
 
+
 if __name__ == "__main__":
     try:
         APP_FILE = argv[1]
-    except:
+    except BaseException:
         APP_FILE = "app.ini"
     main(APP_FILE)
-
-

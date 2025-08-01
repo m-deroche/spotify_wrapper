@@ -1,7 +1,7 @@
 import requests
 
-from   json import dump
-from   auth import token
+from json import dump
+from auth import token
 
 
 class spotify_requests:
@@ -11,7 +11,7 @@ class spotify_requests:
         self.token = token(APP)
 
     def get(self, endpoint: str, PARAMS={}) -> dict:
-        HEADERS = { "Authorization": self.token.get_token() }
+        HEADERS = {"Authorization": self.token.get_token()}
 
         try:
             r = requests.get(f"{self.SPOTIFY_API}{endpoint}",
@@ -20,16 +20,16 @@ class spotify_requests:
                              timeout=10)
             r.raise_for_status()
         except Exception as e:
-            print(f"Failed to GET {endpoint}\n" \
-                  f"params={PARAMS}\n"          \
-                  f"headers={HEADERS}\n"        \
+            print(f"Failed to GET {endpoint}\n"
+                  f"params={PARAMS}\n"
+                  f"headers={HEADERS}\n"
                   f"Exception: {e}")
             raise
 
         return r.json()
 
     def post(self, endpoint: str, DATA={}) -> dict:
-        HEADERS = { "Authorization": self.token.get_token() }
+        HEADERS = {"Authorization": self.token.get_token()}
 
         try:
             r = requests.post(f"{self.SPOTIFY_API}/{endpoint}",
@@ -40,12 +40,11 @@ class spotify_requests:
         except Exception as e:
             r = r.json()
 
-            print(f"Failed to POST {endpoint}\n" \
-                  f"data={DATA}\n"               \
-                  f"headers={HEADERS}\n"         \
+            print(f"Failed to POST {endpoint}\n"
+                  f"data={DATA}\n"
+                  f"headers={HEADERS}\n"
                   f"Exception: {e}")
             raise
-
 
         return r.json()
 
@@ -76,7 +75,7 @@ class spotify_requests:
                 json.append({
                     "id": item["track"]["id"],
                     "track_name": item["track"]["name"],
-                    "artists": [ artist["name"] for artist in item["track"]["artists"] ]
+                    "artists": [artist["name"] for artist in item["track"]["artists"]]
                 })
 
             offset += step
@@ -89,14 +88,11 @@ class spotify_requests:
             json.append({
                 "id": item["track"]["id"],
                 "track_name": item["track"]["name"],
-                "artists": [ artist["name"] for artist in item["track"]["artists"] ]
+                "artists": [artist["name"] for artist in item["track"]["artists"]]
             })
 
         print(f"Fetched likes tracks: {offset + len(r['items'])}")
         print(f"Liked tracks: {len(json)}")
 
-
         with open(f"{username}_liked_tracks.json", "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
-
-

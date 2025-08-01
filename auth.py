@@ -1,14 +1,15 @@
-from   base64          import b64encode
-from   flask           import Flask, redirect, request, session
+from base64 import b64encode
+from flask import Flask, redirect, request, session
 import os
 import pickle
 import random
 import requests
 import string
-from   time            import time, sleep
-from   multiprocessing import Process
-from   urllib.parse    import urlencode
-from   selenium        import webdriver
+from time import time, sleep
+from multiprocessing import Process
+from urllib.parse import urlencode
+from selenium import webdriver
+
 
 class token:
     TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -40,7 +41,6 @@ class token:
         self.auth_user()
         self.get_new_token()
 
-
     def auth_user(self):
         PARAMS = {
             "response_type": "code",
@@ -59,13 +59,13 @@ class token:
                 raise Exception("Cross Site Forgery attempt")
             self.STATE = STATE
         except Exception as e:
-            print(f"Failed to authenticate user\n" \
+            print(f"Failed to authenticate user\n"
                   f"Exception: {e}")
             raise Exception("Failed to authenticate user")
         with open(".CODE", "w") as f:
             f.write(self.CODE)
 
-        return { "message": "user authenticated" }, 204
+        return {"message": "user authenticated"}, 204
 
     def encoded_client(self):
         client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}"
@@ -78,7 +78,7 @@ class token:
             try:
                 with open(".CODE", "r", errors="ignore") as f:
                     self.CODE = f.read()
-            except:
+            except BaseException:
                 pass
             sleep(1)
 
@@ -87,7 +87,7 @@ class token:
         self.driver.quit()
         os.remove(".CODE")
 
-        DATA =  {
+        DATA = {
             "grant_type": "authorization_code",
             "code": self.CODE,
             "redirect_uri": self.CALLBACK,
@@ -101,8 +101,8 @@ class token:
                               timeout=10)
             r.raise_for_status()
         except Exception as e:
-            print(f"Failed to retrieve token\n" \
-                  f"data={DATA}\n"              \
+            print(f"Failed to retrieve token\n"
+                  f"data={DATA}\n"
                   f"Exception: {e}")
             raise Exception("Failed to get new token")
 
