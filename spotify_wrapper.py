@@ -16,7 +16,8 @@ def main(APP_FILE: str):
         "PORT": config["SERVER"]["PORT"]
     }
     api = spotify_requests(APP)
-    api.get_liked()
+    #api.save_liked()
+    api.random_queue()
 
 
 if __name__ == "__main__":
