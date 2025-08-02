@@ -59,14 +59,15 @@ class spotify_requests:
                 "offset": offset
             })
             return r
-
         username = self.get_username()
+        filename = f"{username}_liked_tracks.json"
         json = []
         step = 50
         offset = 0
         r = get_page(1, offset)
         tracks_number = r["total"]
-        print(tracks_number)
+        total = tracks_number
+        print(f"Total tracks: {tracks_number}")
 
         while tracks_number >= step:
             r = get_page(step, offset)
@@ -80,7 +81,7 @@ class spotify_requests:
 
             offset += step
             tracks_number -= step
-            print(f"Fetched liked tracks: {offset}")
+            print(f"Fetched tracks: {offset}/{total}", end="\r")
 
         r = get_page(step, offset)
 
@@ -91,8 +92,7 @@ class spotify_requests:
                 "artists": [artist["name"] for artist in item["track"]["artists"]]
             })
 
-        print(f"Fetched likes tracks: {offset + len(r['items'])}")
-        print(f"Liked tracks: {len(json)}")
-
-        with open(f"{username}_liked_tracks.json", "w", encoding="utf8") as f:
+        print(f"Fetched liked tracks: {offset + len(r['items'])}")
+        with open(filename, "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
+        print(f"Saved {offset + len(r['items'])} tracks to {filename}")
