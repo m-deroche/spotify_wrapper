@@ -26,7 +26,7 @@ class spotify_requests:
                   f"params={PARAMS}\n"
                   f"headers={HEADERS}\n"
                   f"Exception: {e}")
-            raise
+            raise Exception("GET status error")
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()
@@ -47,7 +47,7 @@ class spotify_requests:
                   f"data={DATA}\n"
                   f"headers={HEADERS}\n"
                   f"Exception: {e}")
-            raise
+            raise exception("POST status error")
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()
@@ -138,24 +138,36 @@ class spotify_requests:
         print(f"Fetched liked tracks: {offset + len(r['items'])}")
         return json
 
-    def random_queue(self):
+    def play_next(self):
+        self.post("/me/player/next")
+
+    def random_queue(self, n=25):
         # Playing Shuffle by Tshegue triggers the custom shuffle
         trigger_uri = "spotify:track:2EYde8YgCxW4yYtzdgvN7y"
         liked_tracks = self.get_liked_uris()
         tracks_number = len(liked_tracks)
 
+        print("Waiting to add random tracks to queue")
         while True:
             r = self.get("/me/player")
 
             if r and r["item"]["uri"] == trigger_uri:
-                random_uri_idx = random.randint(0, tracks_number + 1)
-                random_uri = {
-                    "uri": liked_tracks[random_uri_idx]["uri"]
-                }
-                self.post(f"/me/player/queue?{urlencode(random_uri)}")
-                sleep(1)
+                for i in range(n):
+                    random_uri_idx = random.randint(0, tracks_number)
+                    random_uri = {
+                        "uri": liked_tracks[random_uri_idx]["uri"]
+                    }
+                    try:
+                        self.post(f"/me/player/queue?{urlencode(random_uri)}")
+                        sleep(0.3)
+                    except:
+                        break
 
+                    if i == 0:
+                        self.play_next()
+                print(f"Added {n} random tracks to queue")
             sleep(1)
+        print("Stop adding random tracks to queue")
 
     def save_liked(self):
         username = self.get_username()
