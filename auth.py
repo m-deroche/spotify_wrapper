@@ -34,8 +34,8 @@ class token:
         self.app.route("/callback")(self.call_back)
         self.server = Process(target=self.app.run,
                               kwargs={
-                                  'host': self.HOST,
-                                  'port': self.PORT
+                                  "host": self.HOST,
+                                  "port": self.PORT
                               })
         self.server.start()
         self.auth_user()
