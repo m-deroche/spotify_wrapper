@@ -26,7 +26,7 @@ class spotify_requests:
                   f"params={PARAMS}\n"
                   f"headers={HEADERS}\n"
                   f"Exception: {e}")
-            raise Exception("GET status error")
+            raise Exception(f"GET status error: {e}")
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()
@@ -47,7 +47,7 @@ class spotify_requests:
                   f"data={DATA}\n"
                   f"headers={HEADERS}\n"
                   f"Exception: {e}")
-            raise exception("POST status error")
+            raise exception(f"POST status error {e}")
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()

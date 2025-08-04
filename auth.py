@@ -18,6 +18,7 @@ class token:
     def __init__(self, APP: dict):
         self.end_date = 0
         self.CODE = None
+        self.refresh_token = None
         self.CLIENT_ID = APP["CLIENT_ID"]
         self.CLIENT_SECRET = APP["CLIENT_SECRET"]
         self.SCOPE = APP["SCOPE"]
@@ -61,17 +62,15 @@ class token:
         except Exception as e:
             print(f"Failed to authenticate user\n"
                   f"Exception: {e}")
-            raise Exception("Failed to authenticate user")
+            raise Exception(f"Failed to authenticate user {e}")
         with open(".CODE", "w") as f:
             f.write(self.CODE)
 
         return {"message": "user authenticated"}, 204
 
     def encoded_client(self):
-        client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}"
-        print(client)
-
-        return base64.b64encode(client.encode("ascii")).decode("ascii")
+        client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode("ascii")
+        return b64encode(client).decode("ascii")
 
     def get_new_token(self):
         while not self.CODE:
@@ -82,33 +81,49 @@ class token:
                 pass
             sleep(1)
 
-        self.server.terminate()
-        self.server.join()
-        self.driver.quit()
-        os.remove(".CODE")
+        if self.server.is_alive():
+            self.server.terminate()
+            self.server.join()
+            self.driver.quit()
+            os.remove(".CODE")
+
+        HEADERS = {
+            "Authorization": f"Basic {self.encoded_client()}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
 
         DATA = {
             "grant_type": "authorization_code",
             "code": self.CODE,
-            "redirect_uri": self.CALLBACK,
-            "client_id": self.CLIENT_ID,
-            "client_secret": self.CLIENT_SECRET
+            "redirect_uri": self.CALLBACK
         }
+
+        if self.refresh_token:
+            print("g un token")
+            del DATA["code"]
+            del DATA["redirect_uri"]
+            DATA["grant_type"] = "refresh_token"
+            DATA["refresh_token"] = self.refresh_token
 
         try:
             r = requests.post(token.TOKEN_URL,
                               data=DATA,
+                              headers=HEADERS,
                               timeout=10)
             r.raise_for_status()
         except Exception as e:
             print(f"Failed to retrieve token\n"
+                  f"headers={HEADERS}\n",
                   f"data={DATA}\n"
                   f"Exception: {e}")
-            raise Exception("Failed to get new token")
+            raise Exception(f"Failed to get new token {e}")
 
         r = r.json()
         self.end_date = time() + r["expires_in"]
         self.token = r
+        self.refresh_token = r.get("refresh_token", self.refresh_token)
+        print(r)
+        print(self.refresh_token)
 
     def update_if_expired(self):
         if time() > self.end_date:
