@@ -1,6 +1,6 @@
 import random
 import requests
-
+import sqlite3
 from json         import dump
 from auth         import token
 from time         import sleep
@@ -149,7 +149,11 @@ class spotify_requests:
 
         print("Waiting to add random tracks to queue")
         while True:
-            r = self.get("/me/player")
+            try:
+                r = self.get("/me/player")
+            except:
+                r = None
+                pass
 
             if r and r["item"]["uri"] == trigger_uri:
                 for i in range(n):

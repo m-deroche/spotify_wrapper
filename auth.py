@@ -99,7 +99,6 @@ class token:
         }
 
         if self.refresh_token:
-            print("g un token")
             del DATA["code"]
             del DATA["redirect_uri"]
             DATA["grant_type"] = "refresh_token"
@@ -122,8 +121,6 @@ class token:
         self.end_date = time() + r["expires_in"]
         self.token = r
         self.refresh_token = r.get("refresh_token", self.refresh_token)
-        print(r)
-        print(self.refresh_token)
 
     def update_if_expired(self):
         if time() > self.end_date:
