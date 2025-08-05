@@ -1,6 +1,5 @@
 import random
 import requests
-import sqlite3
 from json         import dump
 from auth         import token
 from time         import sleep
@@ -130,9 +129,7 @@ class spotify_requests:
 
         for item in r["items"]:
             json.append({
-                "id": item["track"]["id"],
-                "track_name": item["track"]["name"],
-                "artists": [artist["name"] for artist in item["track"]["artists"]]
+                "uri": item["track"]["uri"]
             })
 
         print(f"Fetched liked tracks: {offset + len(r['items'])}")
@@ -153,7 +150,6 @@ class spotify_requests:
                 r = self.get("/me/player")
             except:
                 r = None
-                pass
 
             if r and r["item"]["uri"] == trigger_uri:
                 for i in range(n):
