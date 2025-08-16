@@ -1,7 +1,6 @@
 import random
 import requests
 import string
-
 from base64 import b64encode
 from flask import Flask, request
 from multiprocessing import Process, Queue
