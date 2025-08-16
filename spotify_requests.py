@@ -1,9 +1,10 @@
 import random
 import requests
-from json         import dump
-from auth         import token
-from time         import sleep
+from json import dump
+from auth import token
+from time import sleep
 from urllib.parse import urlencode
+
 
 class spotify_requests:
     SPOTIFY_API = "https://api.spotify.com/v1"
@@ -148,7 +149,7 @@ class spotify_requests:
         while True:
             try:
                 r = self.get("/me/player")
-            except:
+            except BaseException:
                 r = None
 
             if r and r["item"]["uri"] == trigger_uri:
@@ -160,7 +161,7 @@ class spotify_requests:
                     try:
                         self.post(f"/me/player/queue?{urlencode(random_uri)}")
                         sleep(0.3)
-                    except:
+                    except BaseException:
                         break
 
                     if i == 0:
@@ -176,3 +177,4 @@ class spotify_requests:
         with open(filename, "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
         print(f"Saved {len(json)} tracks to {filename}")
+

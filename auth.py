@@ -2,12 +2,12 @@ import random
 import requests
 import string
 
-from base64          import b64encode
-from flask           import Flask, request
+from base64 import b64encode
+from flask import Flask, request
 from multiprocessing import Process, Queue
-from selenium        import webdriver
-from time            import time
-from urllib.parse    import urlencode
+from selenium import webdriver
+from time import time
+from urllib.parse import urlencode
 
 
 class token:
@@ -38,7 +38,6 @@ class token:
                                   "host": self.HOST,
                                   "port": self.PORT
                               })
-
         self.server.start()
         self.auth_user()
         self.get_new_token()
@@ -66,7 +65,6 @@ class token:
             raise Exception(f"Failed to authenticate user {e}")
         self.queue.put(self.CODE)
         return {"message": "user authenticated"}, 204
-
 
     def encoded_client(self):
         client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode("ascii")
@@ -122,5 +120,5 @@ class token:
 
     def get_token(self) -> str:
         self.update_if_expired()
-
         return f"{self.token['token_type']} {self.token['access_token']}"
+

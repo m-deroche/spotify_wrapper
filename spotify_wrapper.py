@@ -16,7 +16,7 @@ def main(APP_FILE: str):
         "PORT": config["SERVER"]["PORT"]
     }
     api = spotify_requests(APP)
-    #api.save_liked()
+    # api.save_liked()
     api.random_queue()
 
 
@@ -30,3 +30,4 @@ if __name__ == "__main__":
                         help="Application configuration filepath")
     args = parser.parse_args()
     main(args.APP_FILE)
+
