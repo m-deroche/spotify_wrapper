@@ -16,7 +16,6 @@ def main(APP_FILE: str):
         "PORT": config["SERVER"]["PORT"]
     }
     api = spotify_wrapper(APP)
-    # api.save_liked()
     api.random_queue()
 
 

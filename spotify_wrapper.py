@@ -121,14 +121,12 @@ class spotify_wrapper(spotify_requests):
                     }
                     try:
                         self.post(f"/me/player/queue?{urlencode(random_uri)}")
-                        sleep(0.3)
                     except BaseException:
                         break
 
                     if i == 0:
                         self.play_next()
                 print(f"Added {n} random tracks to queue")
-            sleep(1)
         print("Stop adding random tracks to queue")
 
     def save_liked(self):

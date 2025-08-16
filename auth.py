@@ -70,11 +70,11 @@ class token:
         return b64encode(client).decode("ascii")
 
     def get_new_token(self):
-        self.CODE = self.queue.get()
+        if not self.CODE:
+            self.CODE = self.queue.get()
 
         if self.server.is_alive():
             self.server.terminate()
-            self.server.join()
             self.driver.quit()
 
         HEADERS = {
@@ -110,7 +110,7 @@ class token:
         r = r.json()
         self.end_date = time() + r["expires_in"]
         self.token = r
-        self.refresh_token = r.get("refresh_token", self.refresh_token)
+        self.refresh_token = r.get("refresh_token", None)
 
     def update_if_expired(self):
         if time() > self.end_date:
