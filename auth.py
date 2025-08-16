@@ -72,6 +72,7 @@ class token:
     def get_new_token(self):
         if not self.CODE:
             self.CODE = self.queue.get()
+            self.queue.close()
 
         if self.server.is_alive():
             self.server.terminate()

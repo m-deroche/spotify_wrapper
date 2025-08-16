@@ -1,7 +1,7 @@
 import random
 import requests
 from json import dump
-from time import sleep
+from timeit import timeit
 from urllib.parse import urlencode
 from auth import token
 from spotify_requests import spotify_requests
@@ -107,27 +107,32 @@ class spotify_wrapper(spotify_requests):
         tracks_number = len(liked_tracks)
 
         print("Waiting to add random tracks to queue")
-        while True:
-            try:
-                r = self.get("/me/player")
-            except BaseException:
-                r = None
+        try:
+            while True:
+                try:
+                    r = self.get("/me/player")
+                except requests.exceptions.HTTPError as e:
+                    print(e)
+                    r = None
 
-            if r and r["item"]["uri"] == trigger_uri:
-                for i in range(n):
-                    random_uri_idx = random.randint(0, tracks_number)
-                    random_uri = {
-                        "uri": liked_tracks[random_uri_idx]["uri"]
-                    }
-                    try:
-                        self.post(f"/me/player/queue?{urlencode(random_uri)}")
-                    except BaseException:
-                        break
+                if r and r["item"]["uri"] == trigger_uri:
+                    for i in range(n):
+                        random_uri_idx = random.randint(0, tracks_number)
+                        random_uri = {
+                            "uri": liked_tracks[random_uri_idx]["uri"]
+                        }
+                        try:
+                            self.post(
+                                f"/me/player/queue?{urlencode(random_uri)}")
+                        except BaseException:
+                            break
 
-                    if i == 0:
-                        self.play_next()
-                print(f"Added {n} random tracks to queue")
-        print("Stop adding random tracks to queue")
+                        if i == 0:
+                            self.play_next()
+                    print(f"Added {n} random tracks to queue")
+        except KeyboardInterrupt:
+            pass
+        print("Stopped random tracks listener to queue")
 
     def save_liked(self):
         username = self.get_username()
