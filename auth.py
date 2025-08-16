@@ -120,4 +120,3 @@ class token:
     def get_token(self) -> str:
         self.update_if_expired()
         return f"{self.token['token_type']} {self.token['access_token']}"
-

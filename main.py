@@ -30,4 +30,3 @@ if __name__ == "__main__":
                         help="Application configuration filepath")
     args = parser.parse_args()
     main(args.APP_FILE)
-

@@ -138,4 +138,3 @@ class spotify_wrapper(spotify_requests):
         with open(filename, "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
         print(f"Saved {len(json)} tracks to {filename}")
-

@@ -5,6 +5,7 @@ from time import sleep
 from urllib.parse import urlencode
 from auth import token
 
+
 class spotify_requests:
     SPOTIFY_API = "https://api.spotify.com/v1"
 
@@ -50,4 +51,3 @@ class spotify_requests:
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()
-
