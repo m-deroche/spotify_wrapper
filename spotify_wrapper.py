@@ -1,8 +1,8 @@
 #! /bin/python3
 
+import argparse
 import configparser
-from sys import argv
-from request import spotify_requests
+from spotify_requests import spotify_requests
 
 
 def main(APP_FILE: str):
@@ -21,8 +21,12 @@ def main(APP_FILE: str):
 
 
 if __name__ == "__main__":
-    try:
-        APP_FILE = argv[1]
-    except BaseException:
-        APP_FILE = "app.ini"
-    main(APP_FILE)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c",
+                        "--conf-file",
+                        type=str,
+                        default="app.ini",
+                        dest="APP_FILE",
+                        help="Application configuration filepath")
+    args = parser.parse_args()
+    main(args.APP_FILE)

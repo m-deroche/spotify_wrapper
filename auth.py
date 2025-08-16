@@ -1,14 +1,13 @@
-from base64 import b64encode
-from flask import Flask, redirect, request, session
-import os
-import pickle
 import random
 import requests
 import string
-from time import time, sleep
-from multiprocessing import Process
-from urllib.parse import urlencode
-from selenium import webdriver
+
+from base64          import b64encode
+from flask           import Flask, request
+from multiprocessing import Process, Queue
+from selenium        import webdriver
+from time            import time
+from urllib.parse    import urlencode
 
 
 class token:
@@ -28,6 +27,7 @@ class token:
             string.ascii_uppercase + string.digits,
             k=16))
         self.CALLBACK = f"http://{self.HOST}:{self.PORT}/callback"
+        self.queue = Queue(maxsize=1)
         options = webdriver.ChromeOptions()
         options.add_argument(r'--user-data-dir=./.UserData')
         self.driver = webdriver.Chrome(options=options)
@@ -38,6 +38,7 @@ class token:
                                   "host": self.HOST,
                                   "port": self.PORT
                               })
+
         self.server.start()
         self.auth_user()
         self.get_new_token()
@@ -54,38 +55,30 @@ class token:
 
     def call_back(self):
         try:
-            self.CODE = request.args['code']
             STATE = request.args['state']
             if STATE != self.STATE:
                 raise Exception("Cross Site Forgery attempt")
+            self.CODE = request.args['code']
             self.STATE = STATE
         except Exception as e:
             print(f"Failed to authenticate user\n"
                   f"Exception: {e}")
             raise Exception(f"Failed to authenticate user {e}")
-        with open(".CODE", "w") as f:
-            f.write(self.CODE)
-
+        self.queue.put(self.CODE)
         return {"message": "user authenticated"}, 204
+
 
     def encoded_client(self):
         client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode("ascii")
         return b64encode(client).decode("ascii")
 
     def get_new_token(self):
-        while not self.CODE:
-            try:
-                with open(".CODE", "r", errors="ignore") as f:
-                    self.CODE = f.read()
-            except BaseException:
-                pass
-            sleep(1)
+        self.CODE = self.queue.get()
 
         if self.server.is_alive():
             self.server.terminate()
             self.server.join()
             self.driver.quit()
-            os.remove(".CODE")
 
         HEADERS = {
             "Authorization": f"Basic {self.encoded_client()}",

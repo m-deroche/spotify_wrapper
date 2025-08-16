@@ -46,7 +46,7 @@ class spotify_requests:
                   f"data={DATA}\n"
                   f"headers={HEADERS}\n"
                   f"Exception: {e}")
-            raise exception(f"POST status error {e}")
+            raise Exception(f"POST status error {e}")
 
         if "json" in r.headers.get("Content-Type", ""):
             return r.json()
