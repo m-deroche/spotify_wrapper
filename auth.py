@@ -51,17 +51,14 @@ class token:
         }
         self.driver.get(f"{token.AUTH_URL}?{urlencode(PARAMS)}")
 
-    def call_back(self):
-        try:
-            STATE = request.args['state']
-            if STATE != self.STATE:
-                raise Exception("Cross Site Forgery attempt")
-            self.CODE = request.args['code']
-            self.STATE = STATE
-        except Exception as e:
-            print(f"Failed to authenticate user\n"
-                  f"Exception: {e}")
-            raise Exception(f"Failed to authenticate user {e}")
+    def call_back(self) -> (dict, int):
+        STATE = request.args['state']
+
+        if STATE != self.STATE:
+            raise Exception("Cross Site Forgery attempt")
+
+        self.CODE = request.args['code']
+        self.STATE = STATE
         self.queue.put(self.CODE)
         return {"message": "user authenticated"}, 204
 
@@ -95,19 +92,11 @@ class token:
             DATA["grant_type"] = "refresh_token"
             DATA["refresh_token"] = self.refresh_token
 
-        try:
-            r = requests.post(token.TOKEN_URL,
-                              data=DATA,
-                              headers=HEADERS,
-                              timeout=10)
-            r.raise_for_status()
-        except Exception as e:
-            print(f"Failed to retrieve token\n"
-                  f"headers={HEADERS}\n",
-                  f"data={DATA}\n"
-                  f"Exception: {e}")
-            raise Exception(f"Failed to get new token {e}")
-
+        r = requests.post(token.TOKEN_URL,
+                          data=DATA,
+                          headers=HEADERS,
+                          timeout=10)
+        r.raise_for_status()
         r = r.json()
         self.end_date = time() + r["expires_in"]
         self.token = r

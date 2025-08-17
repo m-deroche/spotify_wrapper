@@ -1,7 +1,6 @@
 import random
 import requests
 from json import dump
-from timeit import timeit
 from urllib.parse import urlencode
 from auth import token
 from spotify_requests import spotify_requests
@@ -109,11 +108,7 @@ class spotify_wrapper(spotify_requests):
         print("Waiting to add random tracks to queue")
         try:
             while True:
-                try:
-                    r = self.get("/me/player")
-                except requests.exceptions.HTTPError as e:
-                    print(e)
-                    r = None
+                r = self.get("/me/player")
 
                 if r and r["item"]["uri"] == trigger_uri:
                     for i in range(n):
@@ -121,14 +116,12 @@ class spotify_wrapper(spotify_requests):
                         random_uri = {
                             "uri": liked_tracks[random_uri_idx]["uri"]
                         }
-                        try:
-                            self.post(
-                                f"/me/player/queue?{urlencode(random_uri)}")
-                        except BaseException:
-                            break
+
+                        self.post(f"/me/player/queue?{urlencode(random_uri)}")
 
                         if i == 0:
                             self.play_next()
+
                     print(f"Added {n} random tracks to queue")
         except KeyboardInterrupt:
             pass
@@ -138,6 +131,7 @@ class spotify_wrapper(spotify_requests):
         username = self.get_username()
         filename = f"{username}_liked_tracks.json"
         json = self.get_liked()
+
         with open(filename, "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
         print(f"Saved {len(json)} tracks to {filename}")
