@@ -35,7 +35,7 @@ class spotify_requests:
                 previous_error = self.stats["limit_deltas"][-1]
                 self.stats["limit_deltas"].append(time() - previous_error)
 
-            retry_after = r.headers["Retry-After"]
+            retry_after = int(r.headers["Retry-After"])
             sleep(retry_after)
             self.get(endpoint, PARAMS=PARAMS)
 
@@ -63,7 +63,7 @@ class spotify_requests:
             else:
                 self.stats["limit_deltas"].append(time() - self.stats["limit_deltas"])
 
-            retry_after = r.headers["Retry-After"]
+            retry_after = int(r.headers["Retry-After"])
             sleep(retry_after)
 
         self.stats["api_requests"] += 1

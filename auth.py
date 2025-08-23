@@ -28,7 +28,7 @@ class token:
         self.CALLBACK = f"http://{self.HOST}:{self.PORT}/callback"
         self.queue = Queue(maxsize=1)
         options = webdriver.ChromeOptions()
-        options.add_argument(r'--user-data-dir=./.UserData')
+        options.add_argument("--user-data-dir=.UserData")
         self.driver = webdriver.Chrome(options=options)
         self.app = Flask(__name__)
         self.app.route("/callback")(self.call_back)
