@@ -58,6 +58,60 @@ class spotify_wrapper(spotify_requests):
         print(f"Fetched liked tracks: {offset + len(r['items'])}")
         return json
 
+    def reverse_liked(self):
+        user_id = self.get("/me")["id"]
+        reverse = self.post(f"/users/{user_id}/playlists", {"name": "reverse"})
+        playlist_id = reverse["id"]
+
+        def get_page(limit, offset):
+            r = self.get("/me/tracks", {
+                "market": "FR",
+                "limit": limit,
+                "offset": offset
+            })
+            return r
+        json = []
+        step = 50
+        offset = 0
+        r = get_page(1, offset)
+        tracks_number = r["total"]
+        total = tracks_number
+        print(f"Total tracks: {tracks_number}")
+
+        while tracks_number >= step:
+            r = get_page(step, offset)
+
+            for item in r["items"]:
+                json.append({
+                    "uri": item["track"]["uri"]
+                })
+
+            offset += step
+            tracks_number -= step
+            print(f"Fetched tracks: {offset}/{total}", end="\r")
+
+        print("Liked tracks fetched\n")
+
+        r = get_page(step, offset)
+
+        for item in r["items"]:
+            json.append({
+                "uri": item["track"]["uri"]
+            })
+
+        reverse = reversed(json)
+
+        for i in range(0, len(reverse), 100):
+            print(f"Added tracks: {i}/{tracks_number}", end="\r")
+            try:
+                uris = reverse[i:i+100]
+            except:
+                uris = reverse[i:]
+            self.post(f"/playlists/{playlist_id}/tracks", { "uris": uris })
+
+        print(f"\nReversed {offset + len(r['items'])} liked tracks to reverse playlist")
+        return json
+
     def get_liked_uris(self):
         def get_page(limit, offset):
             r = self.get("/me/tracks", {

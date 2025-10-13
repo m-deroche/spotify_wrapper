@@ -16,7 +16,8 @@ def main(APP_FILE: str):
         "PORT": config["SERVER"]["PORT"]
     }
     api = spotify_wrapper(APP)
-    api.random_queue()
+    api.reverse_liked()
+    #api.random_queue()
     api_requests = api.stats["api_requests"]
     limits_reached = api.stats["limits_reached"]
     first_request_time = api.stats["first_request_time"]
