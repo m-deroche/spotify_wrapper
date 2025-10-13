@@ -52,7 +52,7 @@ class spotify_requests:
 
         r = requests.post(f"{self.SPOTIFY_API}{endpoint}",
                             headers=HEADERS,
-                            data=DATA,
+                            json=DATA,
                             timeout=10)
 
         while r.status_code == 429:
