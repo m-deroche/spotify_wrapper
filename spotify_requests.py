@@ -64,6 +64,8 @@ class spotify_requests:
                 self.stats["limit_deltas"].append(time() - self.stats["limit_deltas"])
 
             retry_after = int(r.headers["Retry-After"])
+            if retry_after > 0:
+                print(f"Retrying after {retry_after}")
             sleep(retry_after)
 
         self.stats["api_requests"] += 1
