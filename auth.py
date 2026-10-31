@@ -29,6 +29,8 @@ class token:
         self.queue = Queue(maxsize=1)
         options = webdriver.ChromeOptions()
         options.add_argument("--user-data-dir=.UserData")
+        # Add headless mode for better compatibility
+        options.add_argument("--headless=new")
         self.driver = webdriver.Chrome(options=options)
         self.app = Flask(__name__)
         self.app.route("/callback")(self.call_back)

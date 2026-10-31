@@ -26,18 +26,29 @@ class spotify_requests:
                             params=PARAMS,
                             timeout=10)
 
+        # Handle rate limiting
         while r.status_code == 429:
             self.stats["limits_reached"] += 1
 
-            if self.stats["limit_deltas"] == []:
+            if not self.stats["limit_deltas"]:
                 self.stats["limit_deltas"].append(time())
             else:
                 previous_error = self.stats["limit_deltas"][-1]
                 self.stats["limit_deltas"].append(time() - previous_error)
 
-            retry_after = int(r.headers["Retry-After"])
+            # Handle Retry-After header (could be string or int)
+            retry_after = r.headers.get("Retry-After", 1)
+            try:
+                retry_after = int(retry_after)
+            except (ValueError, TypeError):
+                retry_after = 1
+                
+            print(f"Rate limit hit. Retrying after {retry_after} seconds")
             sleep(retry_after)
-            self.get(endpoint, PARAMS=PARAMS)
+            r = requests.get(f"{self.SPOTIFY_API}{endpoint}",
+                            headers=HEADERS,
+                            params=PARAMS,
+                            timeout=10)
 
         self.stats["api_requests"] += 1
         r.raise_for_status()
@@ -55,22 +66,33 @@ class spotify_requests:
                             json=DATA,
                             timeout=10)
 
+        # Handle rate limiting
         while r.status_code == 429:
             self.stats["limits_reached"] += 1
 
-            if self.stats["limit_deltas"] == []:
+            if not self.stats["limit_deltas"]:
                 self.stats["limit_deltas"].append(time())
             else:
-                self.stats["limit_deltas"].append(time() - self.stats["limit_deltas"])
+                self.stats["limit_deltas"].append(time() - self.stats["limit_deltas"][-1])
 
-            retry_after = int(r.headers["Retry-After"])
+            # Handle Retry-After header (could be string or int)
+            retry_after = r.headers.get("Retry-After", 1)
+            try:
+                retry_after = int(retry_after)
+            except (ValueError, TypeError):
+                retry_after = 1
+                
             if retry_after > 0:
                 print(f"Retrying after {retry_after}")
             sleep(retry_after)
+            
+            r = requests.post(f"{self.SPOTIFY_API}{endpoint}",
+                            headers=HEADERS,
+                            json=DATA,
+                            timeout=10)
 
         self.stats["api_requests"] += 1
         r.raise_for_status()
-
 
         if "application/json" in r.headers.get("Content-Type", ""):
             return r.json()

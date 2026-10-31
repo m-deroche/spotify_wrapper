@@ -166,7 +166,7 @@ class spotify_wrapper(spotify_requests):
 
                 if r and r["item"]["uri"] == trigger_uri:
                     for i in range(n):
-                        random_uri_idx = random.randint(0, tracks_number)
+                        random_uri_idx = random.randint(0, tracks_number - 1)
                         random_uri = {
                             "uri": liked_tracks[random_uri_idx]["uri"]
                         }
@@ -189,3 +189,47 @@ class spotify_wrapper(spotify_requests):
         with open(filename, "w", encoding="utf8") as f:
             dump(json, f, indent=4, ensure_ascii=False)
         print(f"Saved {len(json)} tracks to {filename}")
+
+    # New method for getting user's playlists
+    def get_user_playlists(self):
+        """Get all playlists for the current user"""
+        def get_page(limit, offset):
+            r = self.get("/me/playlists", {
+                "limit": limit,
+                "offset": offset
+            })
+            return r
+            
+        json = []
+        step = 50
+        offset = 0
+        r = get_page(1, offset)
+        playlists_number = r["total"]
+        total = playlists_number
+        print(f"Total playlists: {playlists_number}")
+
+        while playlists_number >= step:
+            r = get_page(step, offset)
+
+            for item in r["items"]:
+                json.append({
+                    "id": item["id"],
+                    "name": item["name"],
+                    "tracks_count": item["tracks"]["total"]
+                })
+
+            offset += step
+            playlists_number -= step
+            print(f"Fetched playlists: {offset}/{total}", end="\r")
+
+        r = get_page(step, offset)
+
+        for item in r["items"]:
+            json.append({
+                "id": item["id"],
+                "name": item["name"],
+                "tracks_count": item["tracks"]["total"]
+            })
+
+        print(f"Fetched playlists: {offset + len(r['items'])}")
+        return json

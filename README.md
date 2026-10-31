@@ -1,5 +1,67 @@
-Simple Spotify API wrapper
-==============
-Implement your desired endpoints in the **request.py** file inside of the spotify_requests class.
-This API wrapper uses a **.ini** (default: **app.ini**)file as an argument for configuration purposes.
-A flask server is running to retrieve the API user token.
+# Simple Spotify API wrapper
+
+This is an updated version of a Spotify API wrapper that implements your desired endpoints in the **spotify_requests.py** file.
+
+## Features
+
+- Fetches all liked tracks from a user's library
+- Creates a reverse-ordered playlist of liked tracks
+- Adds random tracks from the user's library to the playback queue
+- Saves liked tracks to JSON files for offline access
+- Handles Spotify API rate limiting gracefully
+- Manages authentication tokens with automatic refresh
+
+## Requirements
+
+- Python 3.x
+- Chrome WebDriver for Selenium automation
+- Flask server for handling OAuth callback
+
+## Setup
+
+### Creating a Virtual Environment
+
+To avoid conflicts with system packages, it's recommended to use a virtual environment:
+
+```bash
+# Create a virtual environment
+python3 -m venv spotify_env
+
+# Activate the virtual environment
+# On macOS/Linux:
+source spotify_env/bin/activate
+# On Windows:
+spotify_env\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Spotify Developer Setup
+
+1. Create a Spotify Developer App at https://developer.spotify.com/dashboard
+2. Add your Client ID and Client Secret to the `app.ini` file
+3. Set the redirect URI to `http://127.0.0.1:5000/callback`
+
+## Usage
+
+Run the application:
+```bash
+python main.py
+```
+
+The wrapper will:
+1. Authenticate with Spotify using OAuth 2.0
+2. Fetch your liked tracks
+3. Create a reverse-ordered playlist named "reverse"
+4. Display API statistics
+
+## Configuration
+
+Edit `app.ini` to customize:
+- Client credentials (required)
+- Server settings (optional)
+
+## Authentication Flow
+
+The application uses Selenium to automate the browser-based Spotify authentication flow. A Flask server listens for the OAuth callback after authentication.
