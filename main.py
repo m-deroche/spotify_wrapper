@@ -16,15 +16,15 @@ def main(APP_FILE: str):
         "PORT": config["SERVER"]["PORT"]
     }
     api = spotify_wrapper(APP)
-    
+
     # Execute different operations based on what's needed
     # Default to reverse liked tracks functionality
     api.reverse_liked()
-    
+
     # Optionally uncomment other functions:
     # api.random_queue()  # For random queue functionality
     # api.save_liked()   # For saving liked tracks to file
-    
+
     # Display API statistics
     api_requests = api.stats["api_requests"]
     limits_reached = api.stats["limits_reached"]
