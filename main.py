@@ -17,13 +17,9 @@ def main(APP_FILE: str):
     }
     api = spotify_wrapper(APP)
 
-    # Execute different operations based on what's needed
-    # Default to reverse liked tracks functionality
-    api.reverse_liked()
-
-    # Optionally uncomment other functions:
-    # api.random_queue()  # For random queue functionality
-    # api.save_liked()   # For saving liked tracks to file
+    # Execute only the get_liked and save_liked functionality
+    print("Fetching liked tracks...")
+    api.save_liked()
 
     # Display API statistics
     api_requests = api.stats["api_requests"]

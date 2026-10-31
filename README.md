@@ -14,7 +14,10 @@ This is an updated version of a Spotify API wrapper that implements your desired
 ## Requirements
 
 - Python 3.x
-- Chrome WebDriver for Selenium automation
+- One of the following web drivers (for Selenium automation):
+  - Safari (built-in on macOS)
+  - Chrome (if installed separately)
+  - Firefox (if installed separately)
 - Flask server for handling OAuth callback
 
 ## Setup
@@ -51,9 +54,9 @@ python main.py
 ```
 
 The wrapper will:
-1. Authenticate with Spotify using OAuth 2.0
+1. Authenticate with Spotify using OAuth 2.0 (using Safari, Chrome, or Firefox as needed)
 2. Fetch your liked tracks
-3. Create a reverse-ordered playlist named "reverse"
+3. Save them to a JSON file named after your username
 4. Display API statistics
 
 ## Configuration
@@ -65,3 +68,5 @@ Edit `app.ini` to customize:
 ## Authentication Flow
 
 The application uses Selenium to automate the browser-based Spotify authentication flow. A Flask server listens for the OAuth callback after authentication.
+
+On macOS, the application will attempt to use Safari first, then fall back to Chrome or Firefox if needed.

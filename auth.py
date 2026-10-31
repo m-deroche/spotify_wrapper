@@ -3,10 +3,10 @@ import requests
 import string
 from base64 import b64encode
 from flask import Flask, request
-from multiprocessing import Process, Queue
-from selenium import webdriver
 from time import time
 from urllib.parse import urlencode
+import threading
+import time as time_module
 
 
 class token:
@@ -26,20 +26,25 @@ class token:
             string.ascii_uppercase + string.digits,
             k=16))
         self.CALLBACK = f"http://{self.HOST}:{self.PORT}/callback"
-        self.queue = Queue(maxsize=1)
-        options = webdriver.ChromeOptions()
-        options.add_argument("--user-data-dir=.UserData")
-        # Add headless mode for better compatibility
-        options.add_argument("--headless=new")
-        self.driver = webdriver.Chrome(options=options)
+        
+        # Use threading instead of multiprocessing to avoid pickling issues
+        self.auth_completed = threading.Event()
         self.app = Flask(__name__)
         self.app.route("/callback")(self.call_back)
-        self.server = Process(target=self.app.run,
-                              kwargs={
-                                  "host": self.HOST,
-                                  "port": self.PORT
-                              })
-        self.server.start()
+        
+        # Start the Flask server in a separate thread
+        self.server_thread = threading.Thread(target=self.app.run, 
+                                             kwargs={
+                                                 "host": self.HOST,
+                                                 "port": self.PORT,
+                                                 "debug": False
+                                             })
+        self.server_thread.daemon = True
+        self.server_thread.start()
+        
+        # Wait a moment for server to start
+        time_module.sleep(0.5)
+        
         self.auth_user()
         self.get_new_token()
 
@@ -51,9 +56,25 @@ class token:
             "redirect_uri": self.CALLBACK,
             "state": self.STATE
         }
-        self.driver.get(f"{token.AUTH_URL}?{urlencode(PARAMS)}")
+        
+        # Use a simple web browser approach with a timeout
+        import webbrowser
+        import time as time_lib
+        
+        print("Please authenticate with Spotify in your browser...")
+        print(f"Opening authentication URL: {token.AUTH_URL}?{urlencode(PARAMS)}")
+        webbrowser.open(f"{token.AUTH_URL}?{urlencode(PARAMS)}")
+        
+        # Wait up to 2 minutes for the user to complete authentication
+        timeout = 120
+        start_time = time_lib.time()
+        while not self.auth_completed.is_set() and (time_lib.time() - start_time) < timeout:
+            time_lib.sleep(1)
+            
+        if not self.auth_completed.is_set():
+            raise Exception("Authentication timed out. Please try again.")
 
-    def call_back(self) -> (dict, int):
+    def call_back(self):
         STATE = request.args['state']
 
         if STATE != self.STATE:
@@ -61,8 +82,8 @@ class token:
 
         self.CODE = request.args['code']
         self.STATE = STATE
-        self.queue.put(self.CODE)
-        return {"message": "user authenticated"}, 204
+        self.auth_completed.set()
+        return {"message": "Authentication complete. You can close this window."}, 200
 
     def encoded_client(self):
         client = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode("ascii")
@@ -70,12 +91,8 @@ class token:
 
     def get_new_token(self):
         if not self.CODE:
-            self.CODE = self.queue.get()
-            self.queue.close()
-
-        if self.server.is_alive():
-            self.server.terminate()
-            self.driver.quit()
+            # Wait for authentication to complete (should already be done)
+            self.auth_completed.wait()
 
         HEADERS = {
             "Authorization": f"Basic {self.encoded_client()}",
