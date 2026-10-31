@@ -199,7 +199,7 @@ class spotify_wrapper(spotify_requests):
                 "offset": offset
             })
             return r
-            
+
         json = []
         step = 50
         offset = 0

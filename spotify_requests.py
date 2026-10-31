@@ -42,7 +42,7 @@ class spotify_requests:
                 retry_after = int(retry_after)
             except (ValueError, TypeError):
                 retry_after = 1
-                
+
             print(f"Rate limit hit. Retrying after {retry_after} seconds")
             sleep(retry_after)
             r = requests.get(f"{self.SPOTIFY_API}{endpoint}",
@@ -81,11 +81,11 @@ class spotify_requests:
                 retry_after = int(retry_after)
             except (ValueError, TypeError):
                 retry_after = 1
-                
+
             if retry_after > 0:
                 print(f"Retrying after {retry_after}")
             sleep(retry_after)
-            
+
             r = requests.post(f"{self.SPOTIFY_API}{endpoint}",
                             headers=HEADERS,
                             json=DATA,
