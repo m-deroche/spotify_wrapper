@@ -3,3 +3,5 @@ app.ini
 .CODE
 *.json
 .UserData/
+.spotify_token
+spotify_env/

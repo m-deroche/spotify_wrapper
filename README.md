@@ -1,6 +1,6 @@
 # Simple Spotify API wrapper
 
-This is an updated version of a Spotify API wrapper that implements your desired endpoints in the **spotify_requests.py** file.
+This is an updated version of a Spotify API wrapper. Your desired endpoints go in the **spotify_wrapper.py** file, on top of the request handling in **spotify_requests.py**.
 
 ## Features
 
@@ -13,11 +13,8 @@ This is an updated version of a Spotify API wrapper that implements your desired
 
 ## Requirements
 
-- Python 3.x
-- One of the following web drivers (for Selenium automation):
-  - Safari (built-in on macOS)
-  - Chrome (if installed separately)
-  - Firefox (if installed separately)
+- Python 3.9+
+- A web browser for the Spotify login
 - Flask server for handling OAuth callback
 
 ## Setup
@@ -54,7 +51,7 @@ python main.py
 ```
 
 The wrapper will:
-1. Authenticate with Spotify using OAuth 2.0 (using Safari, Chrome, or Firefox as needed)
+1. Authenticate with Spotify using OAuth 2.0 in your default browser, or reuse your saved session
 2. Fetch your liked tracks
 3. Save them to a JSON file named after your username
 4. Display API statistics
@@ -63,10 +60,11 @@ The wrapper will:
 
 Edit `app.ini` to customize:
 - Client credentials (required)
+- Market used when fetching liked tracks (optional, defaults to FR)
 - Server settings (optional)
 
 ## Authentication Flow
 
-The application uses Selenium to automate the browser-based Spotify authentication flow. A Flask server listens for the OAuth callback after authentication.
+The first run opens the Spotify login page in your default browser. A Flask server listens for the OAuth callback and stops once authentication is done.
 
-On macOS, the application will attempt to use Safari first, then fall back to Chrome or Firefox if needed.
+The refresh token is then saved to `.spotify_token` (ignored by git, readable only by your user), so later runs don't need the browser. Delete this file to log in again. Changing `SCOPE` also triggers a new login.

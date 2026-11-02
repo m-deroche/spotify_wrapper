@@ -1,21 +1,26 @@
-#! /bin/python3
+#!/usr/bin/env python3
 
 import argparse
 import configparser
-from spotify_wrapper import spotify_wrapper
+import sys
+from spotify_wrapper import SpotifyClient
 from time import time
 
-def main(APP_FILE: str):
+def main(app_file: str):
     config = configparser.ConfigParser()
-    config.read(APP_FILE)
-    APP = {
+
+    if not config.read(app_file):
+        sys.exit(f"Configuration file not found: {app_file}")
+
+    app = {
         "CLIENT_ID": config["CLIENT"]["CLIENT_ID"],
         "CLIENT_SECRET": config["CLIENT"]["CLIENT_SECRET"],
         "SCOPE": config["CLIENT"]["SCOPE"],
+        "MARKET": config["CLIENT"].get("MARKET", "FR"),
         "HOST": config["SERVER"]["HOST"],
         "PORT": config["SERVER"]["PORT"]
     }
-    api = spotify_wrapper(APP)
+    api = SpotifyClient(app)
 
     # Execute only the get_liked and save_liked functionality
     print("Fetching liked tracks...")
@@ -28,8 +33,8 @@ def main(APP_FILE: str):
     limit_deltas = api.stats["limit_deltas"]
     requests_per_second = api_requests / (time() - first_request_time)
 
-    if limits_reached != 0:
-        error_deltas = sum(limit_deltas) / limits_reached
+    if limit_deltas:
+        error_deltas = sum(limit_deltas) / len(limit_deltas)
     else:
         error_deltas = -1
 
@@ -45,7 +50,7 @@ if __name__ == "__main__":
                         "--conf-file",
                         type=str,
                         default="app.ini",
-                        dest="APP_FILE",
+                        dest="app_file",
                         help="Application configuration filepath")
     args = parser.parse_args()
-    main(args.APP_FILE)
+    main(args.app_file)
